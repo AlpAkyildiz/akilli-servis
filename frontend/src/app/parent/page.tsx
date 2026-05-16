@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { API_URL } from '@/lib/config';
 
 export default function ParentDashboard() {
   const router = useRouter();
@@ -29,7 +30,7 @@ export default function ParentDashboard() {
   const fetchStudents = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('http://localhost:5000/api/students', {
+      const res = await fetch(`${API_URL}/api/students`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
@@ -46,7 +47,7 @@ export default function ParentDashboard() {
     setStatus({ loading: true, error: '', success: '' });
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('http://localhost:5000/api/students', {
+      const res = await fetch(`${API_URL}/api/students`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',

@@ -1,6 +1,7 @@
 'use client';
 import React, { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { API_URL } from '@/lib/config';
 
 type View = 'dashboard' | 'students' | 'drivers';
 
@@ -25,10 +26,10 @@ export default function AdminDashboard() {
 
   const fetchAll = useCallback(async () => {
     const [sRes, dRes, vRes, rRes] = await Promise.all([
-      fetch('http://localhost:5000/api/students', { headers: authHeader() }),
-      fetch('http://localhost:5000/api/auth/staff/drivers', { headers: authHeader() }),
-      fetch('http://localhost:5000/api/vehicles', { headers: authHeader() }),
-      fetch('http://localhost:5000/api/routes', { headers: authHeader() }),
+      fetch(`${API_URL}/api/students`, { headers: authHeader() }),
+      fetch(`${API_URL}/api/auth/staff/drivers`, { headers: authHeader() }),
+      fetch(`${API_URL}/api/vehicles`, { headers: authHeader() }),
+      fetch(`${API_URL}/api/routes`, { headers: authHeader() }),
     ]);
     if (sRes.ok) setStudents(await sRes.json());
     if (dRes.ok) setDrivers(await dRes.json());
@@ -51,7 +52,7 @@ export default function AdminDashboard() {
   };
 
   const handleApprove = async (id: number) => {
-    await fetch(`http://localhost:5000/api/students/${id}/approve`, { method:'PUT', headers: authHeader() });
+    await fetch(`${API_URL}/api/students/${id}/approve`, { method:'PUT', headers: authHeader() });
     fetchAll();
   };
 
@@ -304,7 +305,7 @@ export default function AdminDashboard() {
               {formStatus.success && <div className="p-3 bg-green-100 text-green-700 rounded-xl text-sm">{formStatus.success}</div>}
 
               {modal === 'driver' && (
-                <form onSubmit={e => { e.preventDefault(); submit('http://localhost:5000/api/auth/staff', { ...driverForm, role: 'DRIVER' }); }} className="space-y-4">
+                <form onSubmit={e => { e.preventDefault(); submit(`${API_URL}/api/auth/staff`, { ...driverForm, role: 'DRIVER' }); }} className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     {[['Ad Soyad','text','name'],['E-posta','email','email'],['Şifre','password','password'],['Telefon','tel','phone']].map(([lbl,type,key]) => (
                       <div key={key}><label className="block text-sm font-medium text-slate-700 mb-1">{lbl}</label>
@@ -320,7 +321,7 @@ export default function AdminDashboard() {
               )}
 
               {modal === 'vehicle' && (
-                <form onSubmit={e => { e.preventDefault(); submit('http://localhost:5000/api/vehicles', vehicleForm); }} className="space-y-4">
+                <form onSubmit={e => { e.preventDefault(); submit(`${API_URL}/api/vehicles`, vehicleForm); }} className="space-y-4">
                   <div><label className="block text-sm font-medium text-slate-700 mb-1">Plaka</label>
                     <input required value={vehicleForm.licensePlate} onChange={e => setVehicleForm({...vehicleForm, licensePlate: e.target.value})} placeholder="34 ABC 123" className="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:outline-none uppercase"/></div>
                   <div className="grid grid-cols-2 gap-4">
@@ -336,7 +337,7 @@ export default function AdminDashboard() {
               )}
 
               {modal === 'route' && (
-                <form onSubmit={e => { e.preventDefault(); submit('http://localhost:5000/api/routes', routeForm); }} className="space-y-4">
+                <form onSubmit={e => { e.preventDefault(); submit(`${API_URL}/api/routes`, routeForm); }} className="space-y-4">
                   <div><label className="block text-sm font-medium text-slate-700 mb-1">Rota Adı</label>
                     <input required value={routeForm.name} onChange={e => setRouteForm({...routeForm, name: e.target.value})} placeholder="Örn: Kadıköy - Şişli" className="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none"/></div>
                   <div className="grid grid-cols-2 gap-4">

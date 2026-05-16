@@ -3,6 +3,7 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { io, Socket } from 'socket.io-client';
 import dynamic from 'next/dynamic';
+import { API_URL, SOCKET_URL } from '@/lib/config';
 
 const LiveMap = dynamic(() => import('../../components/LiveMap'), { ssr: false });
 
@@ -30,7 +31,7 @@ export default function TrackingPage() {
     await Promise.all(
       studentList.map(async (s) => {
         try {
-          const r = await fetch(`http://localhost:5000/api/boarding/status/${s.id}`, { headers: authH() });
+          const r = await fetch(`${API_URL}/api/boarding/status/${s.id}`, { headers: authH() });
           if (r.ok) {
             const st = await r.json();
             statuses[s.id] = st.latestStatus;
@@ -42,7 +43,7 @@ export default function TrackingPage() {
   }, [authH]);
 
   const fetchStudents = useCallback(async () => {
-    const res = await fetch('http://localhost:5000/api/students', { headers: authH() });
+    const res = await fetch(`${API_URL}/api/students`, { headers: authH() });
     if (res.ok) {
       const data = await res.json();
       const approved = data.filter((s: any) => s.status === 'APPROVED');
@@ -52,14 +53,13 @@ export default function TrackingPage() {
   }, [authH, fetchStudentStatuses]);
 
   const fetchNotifications = useCallback(async () => {
-    const res = await fetch('http://localhost:5000/api/boarding/notifications', { headers: authH() });
+    const res = await fetch(`${API_URL}/api/boarding/notifications`, { headers: authH() });
     if (res.ok) setNotifications(await res.json());
   }, [authH]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
     await Promise.all([fetchStudents(), fetchNotifications()]);
-    // Ayrıca socket'ten aktif şoförleri de iste
     socketRef.current?.emit('getActiveDrivers');
     setRefreshing(false);
   };
@@ -74,7 +74,7 @@ export default function TrackingPage() {
     fetchStudents();
     fetchNotifications();
 
-    const socket = io('http://localhost:5000', {
+    const socket = io(SOCKET_URL, {
       reconnection: true,
       reconnectionAttempts: Infinity,
       reconnectionDelay: 1000,

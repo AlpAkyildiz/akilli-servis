@@ -2,6 +2,7 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { io, Socket } from 'socket.io-client';
+import { API_URL, SOCKET_URL } from '@/lib/config';
 
 export default function DriverDashboard() {
   const router = useRouter();
@@ -21,7 +22,7 @@ export default function DriverDashboard() {
   const socketRef = useRef<Socket | null>(null);
   const watchIdRef = useRef<number | null>(null);
   const timerRef = useRef<any>(null);
-  const userRef = useRef<any>(null); // token ve user'ı closure sorununa karşı ref ile tut
+  const userRef = useRef<any>(null);
 
   const getToken = () => localStorage.getItem('token');
   const authH = useCallback(() => ({
@@ -31,7 +32,7 @@ export default function DriverDashboard() {
 
   const fetchStudents = useCallback(async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/boarding/students', {
+      const res = await fetch(`${API_URL}/api/boarding/students`, {
         headers: authH()
       });
       if (res.ok) {
@@ -55,7 +56,7 @@ export default function DriverDashboard() {
 
     fetchStudents();
 
-    const socket = io('http://localhost:5000', {
+    const socket = io(SOCKET_URL, {
       reconnection: true,
       reconnectionAttempts: Infinity,
       reconnectionDelay: 2000,
@@ -105,11 +106,10 @@ export default function DriverDashboard() {
   };
 
   const endTrip = async () => {
-    // Servise binmemiş öğrencileri devamsız kaydet
     const notBoarded = students.filter(s => !boardedIds.has(s.id));
     if (notBoarded.length > 0) {
       await Promise.all(notBoarded.map(s =>
-        fetch('http://localhost:5000/api/boarding/absent', {
+        fetch(`${API_URL}/api/boarding/absent`, {
           method: 'POST',
           headers: authH(),
           body: JSON.stringify({ studentId: s.id, tripSessionId })
@@ -145,7 +145,7 @@ export default function DriverDashboard() {
     const endpoint = alreadyBoarded ? 'dropoff' : 'board';
 
     try {
-      const res = await fetch(`http://localhost:5000/api/boarding/${endpoint}`, {
+      const res = await fetch(`${API_URL}/api/boarding/${endpoint}`, {
         method: 'POST',
         headers: authH(),
         body: JSON.stringify({ studentId: student.id, tripSessionId })

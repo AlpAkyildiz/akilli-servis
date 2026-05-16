@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { API_URL } from '@/lib/config';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -13,7 +14,7 @@ export default function RegisterPage() {
     setStatus({ loading: true, error: '', success: '' });
     
     try {
-      const response = await fetch('http://localhost:5000/api/auth/register', {
+      const response = await fetch(`${API_URL}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form)
