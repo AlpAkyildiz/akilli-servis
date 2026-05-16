@@ -1,0 +1,19 @@
+{
+  "name": "Akıllı Servis Yönetim Sistemi",
+  "short_name": "Akıllı Servis",
+  "description": "Okul servislerini gerçek zamanlı takip edin, öğrenci biniş ve iniş bildirimlerini anında alın.",
+  "theme_color": "#1e3a8a",
+  "background_color": "#0f172a",
+  "display": "standalone",
+  "orientation": "portrait",
+  "scope": "/",
+  "start_url": "/",
+  "icons": [
+    {
+      "src": "/icons/app-icon.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
