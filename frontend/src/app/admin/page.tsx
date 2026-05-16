@@ -104,11 +104,14 @@ export default function AdminDashboard() {
             {view === 'students' && 'Öğrenci Yönetimi'}
             {view === 'drivers' && 'Şoförler ve Rotalar'}
           </h2>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 md:gap-3">
             <span className="hidden md:inline text-slate-500 text-sm">Hoş Geldiniz, <span className="font-bold text-slate-800">{user.name}</span></span>
             <div className="hidden md:flex w-10 h-10 bg-yellow-400 rounded-full items-center justify-center font-bold text-slate-900">A</div>
-            <button onClick={() => { localStorage.clear(); router.push('/login'); }} className="md:hidden text-sm bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-4 py-2 rounded-lg transition-colors font-medium flex items-center gap-2">
-              Çıkış Yap
+            <button onClick={() => window.location.reload()} className="p-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg transition-colors border border-slate-200" title="Sayfayı Yenile">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" /></svg>
+            </button>
+            <button onClick={() => { localStorage.clear(); router.push('/login'); }} className="md:hidden text-sm bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-3 py-2 rounded-lg transition-colors font-medium flex items-center gap-2">
+              Çıkış
             </button>
           </div>
         </header>
@@ -312,10 +315,10 @@ export default function AdminDashboard() {
                   <div className="grid grid-cols-2 gap-4">
                     {[['Ad Soyad','text','name'],['E-posta','email','email'],['Şifre','password','password'],['Telefon','tel','phone']].map(([lbl,type,key]) => (
                       <div key={key}><label className="block text-sm font-medium text-slate-700 mb-1">{lbl}</label>
-                        <input type={type} required value={(driverForm as any)[key]} onChange={e => setDriverForm({...driverForm, [key]: e.target.value})} className="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"/></div>
+                        <input type={type} required value={(driverForm as any)[key]} onChange={e => setDriverForm({...driverForm, [key]: e.target.value})} className="w-full p-3 bg-white text-slate-900 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"/></div>
                     ))}
                     <div className="col-span-2"><label className="block text-sm font-medium text-slate-700 mb-1">Ehliyet No</label>
-                      <input required value={driverForm.licenseNumber} onChange={e => setDriverForm({...driverForm, licenseNumber: e.target.value})} className="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"/></div>
+                      <input required value={driverForm.licenseNumber} onChange={e => setDriverForm({...driverForm, licenseNumber: e.target.value})} className="w-full p-3 bg-white text-slate-900 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"/></div>
                   </div>
                   <button disabled={formStatus.loading} type="submit" className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all">
                     {formStatus.loading ? 'Kaydediliyor...' : 'Şoförü Kaydet'}
@@ -326,12 +329,12 @@ export default function AdminDashboard() {
               {modal === 'vehicle' && (
                 <form onSubmit={e => { e.preventDefault(); submit(`${API_URL}/api/vehicles`, vehicleForm); }} className="space-y-4">
                   <div><label className="block text-sm font-medium text-slate-700 mb-1">Plaka</label>
-                    <input required value={vehicleForm.licensePlate} onChange={e => setVehicleForm({...vehicleForm, licensePlate: e.target.value})} placeholder="34 ABC 123" className="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:outline-none uppercase"/></div>
+                    <input required value={vehicleForm.licensePlate} onChange={e => setVehicleForm({...vehicleForm, licensePlate: e.target.value})} placeholder="34 ABC 123" className="w-full p-3 bg-white text-slate-900 border border-slate-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:outline-none uppercase"/></div>
                   <div className="grid grid-cols-2 gap-4">
                     <div><label className="block text-sm font-medium text-slate-700 mb-1">Kapasite</label>
-                      <input type="number" min="1" required value={vehicleForm.capacity} onChange={e => setVehicleForm({...vehicleForm, capacity: e.target.value})} className="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:outline-none"/></div>
+                      <input type="number" min="1" required value={vehicleForm.capacity} onChange={e => setVehicleForm({...vehicleForm, capacity: e.target.value})} className="w-full p-3 bg-white text-slate-900 border border-slate-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:outline-none"/></div>
                     <div><label className="block text-sm font-medium text-slate-700 mb-1">Model</label>
-                      <input value={vehicleForm.model} onChange={e => setVehicleForm({...vehicleForm, model: e.target.value})} placeholder="Mercedes Sprinter" className="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:outline-none"/></div>
+                      <input value={vehicleForm.model} onChange={e => setVehicleForm({...vehicleForm, model: e.target.value})} placeholder="Mercedes Sprinter" className="w-full p-3 bg-white text-slate-900 border border-slate-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:outline-none"/></div>
                   </div>
                   <button disabled={formStatus.loading} type="submit" className="w-full py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl transition-all">
                     {formStatus.loading ? 'Kaydediliyor...' : 'Aracı Kaydet'}
@@ -342,19 +345,19 @@ export default function AdminDashboard() {
               {modal === 'route' && (
                 <form onSubmit={e => { e.preventDefault(); submit(`${API_URL}/api/routes`, routeForm); }} className="space-y-4">
                   <div><label className="block text-sm font-medium text-slate-700 mb-1">Rota Adı</label>
-                    <input required value={routeForm.name} onChange={e => setRouteForm({...routeForm, name: e.target.value})} placeholder="Örn: Kadıköy - Şişli" className="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none"/></div>
+                    <input required value={routeForm.name} onChange={e => setRouteForm({...routeForm, name: e.target.value})} placeholder="Örn: Kadıköy - Şişli" className="w-full p-3 bg-white text-slate-900 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none"/></div>
                   <div className="grid grid-cols-2 gap-4">
                     <div><label className="block text-sm font-medium text-slate-700 mb-1">Başlangıç</label>
-                      <input value={routeForm.startPoint} onChange={e => setRouteForm({...routeForm, startPoint: e.target.value})} className="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none"/></div>
+                      <input value={routeForm.startPoint} onChange={e => setRouteForm({...routeForm, startPoint: e.target.value})} className="w-full p-3 bg-white text-slate-900 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none"/></div>
                     <div><label className="block text-sm font-medium text-slate-700 mb-1">Bitiş</label>
-                      <input value={routeForm.endPoint} onChange={e => setRouteForm({...routeForm, endPoint: e.target.value})} className="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none"/></div>
+                      <input value={routeForm.endPoint} onChange={e => setRouteForm({...routeForm, endPoint: e.target.value})} className="w-full p-3 bg-white text-slate-900 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none"/></div>
                     <div><label className="block text-sm font-medium text-slate-700 mb-1">Şoför</label>
-                      <select required value={routeForm.driverId} onChange={e => setRouteForm({...routeForm, driverId: e.target.value})} className="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none bg-white">
+                      <select required value={routeForm.driverId} onChange={e => setRouteForm({...routeForm, driverId: e.target.value})} className="w-full p-3 bg-white text-slate-900 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none">
                         <option value="">Şoför seçin...</option>
                         {drivers.map(d => <option key={d.id} value={d.id}>{d.user?.name} ({d.licenseNumber})</option>)}
                       </select></div>
                     <div><label className="block text-sm font-medium text-slate-700 mb-1">Araç</label>
-                      <select required value={routeForm.vehicleId} onChange={e => setRouteForm({...routeForm, vehicleId: e.target.value})} className="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none bg-white">
+                      <select required value={routeForm.vehicleId} onChange={e => setRouteForm({...routeForm, vehicleId: e.target.value})} className="w-full p-3 bg-white text-slate-900 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none">
                         <option value="">Araç seçin...</option>
                         {vehicles.map(v => <option key={v.id} value={v.id}>{v.licensePlate} ({v.capacity} kişi)</option>)}
                       </select></div>

@@ -80,9 +80,12 @@ export default function ParentDashboard() {
             </div>
             <h1 className="text-xl font-bold tracking-wide">Veli Paneli</h1>
           </div>
-          <div className="flex items-center gap-6">
-            <span className="font-medium text-blue-100">Merhaba, {user.name}</span>
-            <button onClick={() => { localStorage.clear(); router.push('/login'); }} className="text-sm bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition-colors">
+          <div className="flex items-center gap-3 md:gap-6">
+            <span className="hidden md:inline font-medium text-blue-100">Merhaba, {user.name}</span>
+            <button onClick={() => window.location.reload()} className="p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors" title="Sayfayı Yenile">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" /></svg>
+            </button>
+            <button onClick={() => { localStorage.clear(); router.push('/login'); }} className="text-sm bg-white/10 hover:bg-white/20 px-3 md:px-4 py-2 rounded-lg transition-colors">
               Çıkış Yap
             </button>
           </div>
@@ -176,15 +179,15 @@ export default function ParentDashboard() {
               
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Öğrenci Adı Soyadı</label>
-                <input type="text" required value={form.name} onChange={e => setForm({...form, name: e.target.value})} className="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-yellow-400 focus:outline-none" />
+                <input type="text" required value={form.name} onChange={e => setForm({...form, name: e.target.value})} className="w-full p-3 bg-white text-slate-900 border border-slate-200 rounded-xl focus:ring-2 focus:ring-yellow-400 focus:outline-none" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Okul Adı</label>
-                <input type="text" required value={form.schoolName} onChange={e => setForm({...form, schoolName: e.target.value})} placeholder="Örn: Cumhuriyet İlkokulu" className="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-yellow-400 focus:outline-none" />
+                <input type="text" required value={form.schoolName} onChange={e => setForm({...form, schoolName: e.target.value})} placeholder="Örn: Cumhuriyet İlkokulu" className="w-full p-3 bg-white text-slate-900 border border-slate-200 rounded-xl focus:ring-2 focus:ring-yellow-400 focus:outline-none" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Okul Numarası</label>
-                <input type="text" required value={form.schoolNumber} onChange={e => setForm({...form, schoolNumber: e.target.value})} className="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-yellow-400 focus:outline-none" />
+                <input type="text" required value={form.schoolNumber} onChange={e => setForm({...form, schoolNumber: e.target.value})} className="w-full p-3 bg-white text-slate-900 border border-slate-200 rounded-xl focus:ring-2 focus:ring-yellow-400 focus:outline-none" />
               </div>
 
               <button disabled={status.loading} type="submit" className="w-full mt-4 py-3 bg-yellow-400 hover:bg-yellow-300 text-blue-900 font-bold rounded-xl transition-all shadow-lg hover:shadow-yellow-400/30">
