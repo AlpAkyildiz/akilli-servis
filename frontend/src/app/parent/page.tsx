@@ -1,6 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function ParentDashboard() {
   const router = useRouter();
@@ -140,10 +141,13 @@ export default function ParentDashboard() {
                 </div>
                 
                 {student.status === 'APPROVED' ? (
-                  <button className="w-full py-3 bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded-xl font-medium transition-colors flex items-center justify-center gap-2">
+                  <Link
+                    href="/tracking"
+                    className="w-full py-3 bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded-xl font-medium transition-colors flex items-center justify-center gap-2"
+                  >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                     Canlı Takip Et
-                  </button>
+                  </Link>
                 ) : (
                   <button disabled className="w-full py-3 bg-slate-50 text-slate-400 rounded-xl font-medium cursor-not-allowed">
                     Takip İçin Onay Bekleniyor

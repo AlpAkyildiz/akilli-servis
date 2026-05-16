@@ -148,15 +148,18 @@ enum BoardingType {
 }
 
 model BoardingLog {
-  id        Int          @id @default(autoincrement())
-  type      BoardingType
+  id              Int          @id @default(autoincrement())
+  type            BoardingType
+  tripSessionId   String?      // UUID for a single trip session
   
   studentId Int
   student   Student      @relation(fields: [studentId], references: [id])
   
-  routeId   Int
-  route     Route        @relation(fields: [routeId], references: [id])
+  routeId   Int?
+  route     Route?       @relation(fields: [routeId], references: [id])
 
+  driverProfileId Int?
+  
   timestamp DateTime     @default(now())
 }
 
