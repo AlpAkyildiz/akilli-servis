@@ -18,6 +18,17 @@ enum StudentStatus {
   REJECTED
 }
 
+enum VehicleStatus {
+  IDLE
+  ON_WAY
+  MAINTENANCE
+}
+
+enum NotificationStatus {
+  UNREAD
+  READ
+}
+
 model User {
   id        Int      @id @default(autoincrement())
   email     String   @unique
@@ -25,12 +36,43 @@ model User {
   role      Role     @default(PARENT)
   name      String
 
+  // Inheritance / Profiles (1-to-1)
+  parentProfile ParentProfile?
+  driverProfile DriverProfile?
+
   // Relations
-  children  Student[] @relation("ParentChildren")
-  routes    Route[]   @relation("DriverRoutes")
+  notifications Notification[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model ParentProfile {
+  id        Int      @id @default(autoincrement())
+  phone     String?
+  address   String?
+  
+  userId    Int      @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  children  Student[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model DriverProfile {
+  id            Int      @id @default(autoincrement())
+  licenseNumber String?  @unique
+  phone         String?
+  
+  userId        Int      @unique
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  routes        Route[]
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 model Student {
@@ -41,11 +83,12 @@ model Student {
   photoUrl     String?
   status       StudentStatus @default(PENDING)
 
-  // Relations
   parentId     Int
-  parent       User          @relation("ParentChildren", fields: [parentId], references: [id])
+  parent       ParentProfile @relation(fields: [parentId], references: [id])
   
-  routes       StudentRoute[]
+  vehicleId    Int?
+  vehicle      Vehicle?      @relation(fields: [vehicleId], references: [id])
+
   boardingLogs BoardingLog[]
 
   createdAt    DateTime      @default(now())
@@ -53,11 +96,14 @@ model Student {
 }
 
 model Vehicle {
-  id           Int      @id @default(autoincrement())
-  licensePlate String   @unique
+  id           Int           @id @default(autoincrement())
+  licensePlate String        @unique
   capacity     Int
+  model        String?
+  status       VehicleStatus @default(IDLE)
 
   routes       Route[]
+  students     Student[]
 
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -66,27 +112,33 @@ model Vehicle {
 model Route {
   id          Int      @id @default(autoincrement())
   name        String
+  startPoint  String?
+  endPoint    String?
   
   driverId    Int
-  driver      User     @relation("DriverRoutes", fields: [driverId], references: [id])
+  driver      DriverProfile @relation(fields: [driverId], references: [id])
   
   vehicleId   Int
-  vehicle     Vehicle  @relation(fields: [vehicleId], references: [id])
+  vehicle     Vehicle       @relation(fields: [vehicleId], references: [id])
 
-  students    StudentRoute[]
+  stops       Stop[]
   boardingLogs BoardingLog[]
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
 
-model StudentRoute {
-  studentId Int
-  student   Student @relation(fields: [studentId], references: [id])
-  routeId   Int
-  route     Route   @relation(fields: [routeId], references: [id])
+model Stop {
+  id          Int      @id @default(autoincrement())
+  name        String
+  lat         Float
+  lng         Float
 
-  @@id([studentId, routeId])
+  routeId     Int
+  route       Route    @relation(fields: [routeId], references: [id])
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 enum BoardingType {
@@ -106,4 +158,15 @@ model BoardingLog {
   route     Route        @relation(fields: [routeId], references: [id])
 
   timestamp DateTime     @default(now())
+}
+
+model Notification {
+  id        Int                @id @default(autoincrement())
+  message   String
+  status    NotificationStatus @default(UNREAD)
+
+  userId    Int
+  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime           @default(now())
 }

@@ -5,6 +5,8 @@ import { Server } from 'socket.io';
 import dotenv from 'dotenv';
 import authRoutes from './routes/authRoutes';
 import studentRoutes from './routes/studentRoutes';
+import vehicleRoutes from './routes/vehicleRoutes';
+import routeRoutes from './routes/routeRoutes';
 import { setupTrackingSocket } from './sockets/trackingHandler';
 
 dotenv.config();
@@ -21,6 +23,8 @@ app.use(express.json());
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/students', studentRoutes);
+app.use('/api/vehicles', vehicleRoutes);
+app.use('/api/routes', routeRoutes);
 
 app.get('/', (req, res) => {
   res.send('Akıllı Servis API Çalışıyor 🚀');
