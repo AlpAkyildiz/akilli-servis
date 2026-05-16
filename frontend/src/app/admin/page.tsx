@@ -58,25 +58,29 @@ export default function AdminDashboard() {
 
   const handleDeleteStudent = async (id: number) => {
     if (!confirm('Bu öğrenciyi silmek istediğinize emin misiniz?')) return;
-    await fetch(`${API_URL}/api/students/${id}`, { method:'DELETE', headers: authHeader() });
+    const res = await fetch(`${API_URL}/api/students/${id}`, { method:'DELETE', headers: authHeader() });
+    if (!res.ok) { const data = await res.json(); alert(data.error || 'Silinirken hata oluştu.'); }
     fetchAll();
   };
 
   const handleDeleteDriver = async (id: number) => {
     if (!confirm('Bu şoförü silmek istediğinize emin misiniz? Atanmış rotaları da silinecektir.')) return;
-    await fetch(`${API_URL}/api/auth/staff/drivers/${id}`, { method:'DELETE', headers: authHeader() });
+    const res = await fetch(`${API_URL}/api/auth/staff/drivers/${id}`, { method:'DELETE', headers: authHeader() });
+    if (!res.ok) { const data = await res.json(); alert(data.error || 'Silinirken hata oluştu.'); }
     fetchAll();
   };
 
   const handleDeleteVehicle = async (id: number) => {
     if (!confirm('Bu aracı silmek istediğinize emin misiniz? Atanmış rotaları da silinecektir.')) return;
-    await fetch(`${API_URL}/api/vehicles/${id}`, { method:'DELETE', headers: authHeader() });
+    const res = await fetch(`${API_URL}/api/vehicles/${id}`, { method:'DELETE', headers: authHeader() });
+    if (!res.ok) { const data = await res.json(); alert(data.error || 'Silinirken hata oluştu.'); }
     fetchAll();
   };
 
   const handleDeleteRoute = async (id: number) => {
     if (!confirm('Bu rotayı silmek istediğinize emin misiniz?')) return;
-    await fetch(`${API_URL}/api/routes/${id}`, { method:'DELETE', headers: authHeader() });
+    const res = await fetch(`${API_URL}/api/routes/${id}`, { method:'DELETE', headers: authHeader() });
+    if (!res.ok) { const data = await res.json(); alert(data.error || 'Silinirken hata oluştu.'); }
     fetchAll();
   };
 

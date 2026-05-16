@@ -40,6 +40,7 @@ export class StudentService implements IStudentService {
   }
 
   async deleteStudent(studentId: number): Promise<Student> {
+    await prisma.boardingLog.deleteMany({ where: { studentId } });
     return prisma.student.delete({
       where: { id: studentId }
     });

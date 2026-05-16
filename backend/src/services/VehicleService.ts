@@ -22,6 +22,9 @@ export class VehicleService implements IVehicleService {
   }
 
   async deleteVehicle(id: number): Promise<Vehicle> {
+    // Clear vehicle assignment from students
+    await prisma.student.updateMany({ where: { vehicleId: id }, data: { vehicleId: null } });
+
     // Delete associated routes first
     const routes = await prisma.route.findMany({ where: { vehicleId: id } });
     for (const r of routes) {
