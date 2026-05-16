@@ -91,9 +91,11 @@ export const setupTrackingSocket = (io: Server) => {
     });
 
     // Öğrenci durumu güncellemesi — boardingController buraya emit eder
-    socket.on('boardingUpdate', (data: { studentId: number; type: string; driverId: string }) => {
-      // Velileri bilgilendir
-      io.to(`driver_${data.driverId}`).emit('studentStatusChanged', data);
+    socket.on('boardingUpdate', (data: { studentId: number; type: string; driverId?: string }) => {
+      const driverId = data.driverId || socket.data.driverId;
+      if (!driverId) return;
+      // Tüm velileri bilgilendir (haritaya girmemiş olsalar bile)
+      io.emit('studentStatusChanged', { ...data, driverId });
     });
 
     // Disconnect: anında kapatma, 30 sn grace period ver

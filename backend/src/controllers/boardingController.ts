@@ -33,6 +33,21 @@ export const markBoarded = async (req: AuthRequest, res: Response) => {
       }
     });
 
+    // Veliye bildirim gönder
+    const student = await prisma.student.findUnique({
+      where: { id: parseInt(studentId) },
+      include: { parent: true }
+    });
+
+    if (student?.parent?.userId) {
+      await prisma.notification.create({
+        data: {
+          userId: student.parent.userId,
+          message: `✅ ${student.name} servise bindi.`
+        }
+      });
+    }
+
     res.status(201).json({ message: 'Öğrenci servise alındı.', log });
   } catch (error: any) {
     console.error('markBoarded error:', error);
@@ -53,6 +68,21 @@ export const markDroppedOff = async (req: AuthRequest, res: Response) => {
         driverProfileId: driverProfileId ? parseInt(driverProfileId) : null
       }
     });
+
+    // Veliye bildirim gönder
+    const student = await prisma.student.findUnique({
+      where: { id: parseInt(studentId) },
+      include: { parent: true }
+    });
+
+    if (student?.parent?.userId) {
+      await prisma.notification.create({
+        data: {
+          userId: student.parent.userId,
+          message: `🏁 ${student.name} servisten indi.`
+        }
+      });
+    }
 
     res.status(201).json({ message: 'Öğrenci indirildi.', log });
   } catch (error: any) {

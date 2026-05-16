@@ -105,6 +105,7 @@ export default function TrackingPage() {
     // Öğrenci binince gerçek zamanlı durum güncellemesi
     socket.on('studentStatusChanged', () => {
       fetchStudents();
+      fetchNotifications();
     });
 
     return () => { socket.disconnect(); };
