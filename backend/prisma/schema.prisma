@@ -1,0 +1,109 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  DRIVER
+  PARENT
+}
+
+enum StudentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  role      Role     @default(PARENT)
+  name      String
+
+  // Relations
+  children  Student[] @relation("ParentChildren")
+  routes    Route[]   @relation("DriverRoutes")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Student {
+  id           Int           @id @default(autoincrement())
+  name         String
+  schoolName   String
+  schoolNumber String
+  photoUrl     String?
+  status       StudentStatus @default(PENDING)
+
+  // Relations
+  parentId     Int
+  parent       User          @relation("ParentChildren", fields: [parentId], references: [id])
+  
+  routes       StudentRoute[]
+  boardingLogs BoardingLog[]
+
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model Vehicle {
+  id           Int      @id @default(autoincrement())
+  licensePlate String   @unique
+  capacity     Int
+
+  routes       Route[]
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Route {
+  id          Int      @id @default(autoincrement())
+  name        String
+  
+  driverId    Int
+  driver      User     @relation("DriverRoutes", fields: [driverId], references: [id])
+  
+  vehicleId   Int
+  vehicle     Vehicle  @relation(fields: [vehicleId], references: [id])
+
+  students    StudentRoute[]
+  boardingLogs BoardingLog[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model StudentRoute {
+  studentId Int
+  student   Student @relation(fields: [studentId], references: [id])
+  routeId   Int
+  route     Route   @relation(fields: [routeId], references: [id])
+
+  @@id([studentId, routeId])
+}
+
+enum BoardingType {
+  BOARDED
+  DROPPED_OFF
+  ABSENT
+}
+
+model BoardingLog {
+  id        Int          @id @default(autoincrement())
+  type      BoardingType
+  
+  studentId Int
+  student   Student      @relation(fields: [studentId], references: [id])
+  
+  routeId   Int
+  route     Route        @relation(fields: [routeId], references: [id])
+
+  timestamp DateTime     @default(now())
+}

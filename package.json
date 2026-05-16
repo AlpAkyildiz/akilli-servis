@@ -1,0 +1,25 @@
+{
+  "name": "akilli-servis-yonetim-sistemi",
+  "version": "1.0.0",
+  "description": "Büyükşehir Okul Servis Araçları Yönetim Sistemi",
+  "scripts": {
+    "start:backend": "cd backend && npm run dev",
+    "start:frontend": "cd frontend && npm run dev",
+    "start:mobile": "cd mobile && npx expo start",
+    "install:all": "npm run install:backend && npm run install:frontend && npm run install:mobile",
+    "install:backend": "cd backend && npm install",
+    "install:frontend": "cd frontend && npm install",
+    "install:mobile": "cd mobile && npm install"
+  },
+  "keywords": [
+    "okul",
+    "servis",
+    "yonetim",
+    "react",
+    "nextjs",
+    "react-native",
+    "nodejs"
+  ],
+  "author": "",
+  "license": "MIT"
+}
