@@ -19,6 +19,10 @@ export default function DriverDashboard() {
   const [loadingBoard, setLoadingBoard] = useState<number | null>(null);
   const [boardError, setBoardError] = useState('');
 
+  // Atanmış araç/rota bilgisi
+  const [myRoutes, setMyRoutes] = useState<any[]>([]);
+  const [loadingRoutes, setLoadingRoutes] = useState(true);
+
   const socketRef = useRef<Socket | null>(null);
   const watchIdRef = useRef<number | null>(null);
   const timerRef = useRef<any>(null);
@@ -32,17 +36,23 @@ export default function DriverDashboard() {
 
   const fetchStudents = useCallback(async () => {
     try {
-      const res = await fetch(`${API_URL}/api/boarding/students`, {
-        headers: authH()
-      });
+      const res = await fetch(`${API_URL}/api/boarding/students`, { headers: authH() });
+      if (res.ok) setStudents(await res.json());
+    } catch (e) { console.error('fetchStudents network error:', e); }
+  }, [authH]);
+
+  const fetchMyRoutes = useCallback(async () => {
+    try {
+      setLoadingRoutes(true);
+      const res = await fetch(`${API_URL}/api/routes/my`, { headers: authH() });
       if (res.ok) {
-        setStudents(await res.json());
-      } else {
-        const err = await res.json();
-        console.error('fetchStudents error:', err);
+        const data = await res.json();
+        setMyRoutes(data.routes || []);
       }
     } catch (e) {
-      console.error('fetchStudents network error:', e);
+      console.error('fetchMyRoutes error:', e);
+    } finally {
+      setLoadingRoutes(false);
     }
   }, [authH]);
 
@@ -55,6 +65,7 @@ export default function DriverDashboard() {
     userRef.current = parsedUser;
 
     fetchStudents();
+    fetchMyRoutes();
 
     const socket = io(SOCKET_URL, {
       reconnection: true,
@@ -70,9 +81,15 @@ export default function DriverDashboard() {
       if (watchIdRef.current !== null) navigator.geolocation.clearWatch(watchIdRef.current);
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [router, fetchStudents]);
+  }, [router, fetchStudents, fetchMyRoutes]);
 
   const startTrip = () => {
+    // 1. KURAL: Araç/Rota atanmamışsa sefere başlama
+    if (myRoutes.length === 0) {
+      alert('Sefere başlamak için yöneticinin size bir araç ve rota ataması gerekmektedir.');
+      return;
+    }
+
     const tok = getToken();
     if (!tok || !socketRef.current || !userRef.current) return;
     setLocationError('');
@@ -106,6 +123,12 @@ export default function DriverDashboard() {
   };
 
   const endTrip = async () => {
+    // 2. KURAL: Servisteki tüm öğrencileri bırakmadan seferi bitiremez
+    if (boardedIds.size > 0) {
+      alert(`🚫 Seferi bitiremezsiniz!\nServiste hala iniş yapmamış ${boardedIds.size} öğrenci var. Lütfen önce tüm öğrencileri indirin.`);
+      return;
+    }
+
     const notBoarded = students.filter(s => !boardedIds.has(s.id));
     if (notBoarded.length > 0) {
       await Promise.all(notBoarded.map(s =>
@@ -133,6 +156,8 @@ export default function DriverDashboard() {
 
     if (notBoarded.length > 0) {
       alert(`Sefer tamamlandı.\n${notBoarded.length} öğrenci servise binmedi — velilerine bildirim gönderildi.`);
+    } else {
+      alert('Sefer başarıyla tamamlandı!');
     }
   };
 
@@ -155,14 +180,12 @@ export default function DriverDashboard() {
 
       if (!res.ok) {
         setBoardError(`Hata: ${data.error || 'İşlem başarısız'} (${data.detail || ''})`);
-        console.error('toggleBoard error:', data);
       } else {
         setBoardedIds(prev => {
           const next = new Set(prev);
           alreadyBoarded ? next.delete(student.id) : next.add(student.id);
           return next;
         });
-        // Velilere socket ile bildir
         socketRef.current?.emit('boardingUpdate', {
           studentId: student.id,
           type: alreadyBoarded ? 'DROPPED_OFF' : 'BOARDED',
@@ -170,7 +193,6 @@ export default function DriverDashboard() {
       }
     } catch (e: any) {
       setBoardError(`Ağ hatası: ${e.message}`);
-      console.error('toggleBoard network error:', e);
     } finally {
       setLoadingBoard(null);
     }
@@ -184,6 +206,8 @@ export default function DriverDashboard() {
       <div className="w-8 h-8 border-4 border-yellow-400 border-t-transparent rounded-full animate-spin" />
     </div>
   );
+
+  const hasAssignedRoute = myRoutes.length > 0;
 
   return (
     <div className="min-h-screen bg-slate-900 text-white flex flex-col">
@@ -203,6 +227,32 @@ export default function DriverDashboard() {
       </header>
 
       <main className="flex-1 p-4 max-w-lg mx-auto w-full space-y-4">
+
+        {/* Atanmış Rota / Araç Bilgisi */}
+        <div className="bg-slate-800 border border-slate-700 rounded-3xl p-5 space-y-2">
+          <h2 className="font-bold text-sm text-slate-400 uppercase tracking-wider">Atanmış Görev Bilgisi</h2>
+          {loadingRoutes ? (
+            <p className="text-xs text-slate-500 animate-pulse">Görev bilgileri yükleniyor...</p>
+          ) : hasAssignedRoute ? (
+            myRoutes.map(r => (
+              <div key={r.id} className="bg-slate-700/50 rounded-2xl p-4 border border-slate-600/50 flex justify-between items-center">
+                <div>
+                  <p className="font-bold text-yellow-400">{r.name}</p>
+                  <p className="text-xs text-slate-300 mt-1">{r.startPoint || '-'} ➔ {r.endPoint || '-'}</p>
+                </div>
+                <div className="bg-slate-800 px-3 py-2 rounded-xl border border-slate-600 text-center">
+                  <p className="text-[10px] text-slate-400">ARAÇ PLAKASI</p>
+                  <p className="font-mono font-bold text-sm text-white uppercase">{r.vehicle?.licensePlate || 'ATANMADI'}</p>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="bg-red-900/20 border border-red-500/30 rounded-2xl p-4 text-center space-y-2">
+              <p className="text-red-400 font-bold text-sm">🚫 Aracınız ve Rotanız Bulunmuyor</p>
+              <p className="text-slate-400 text-xs">Sefere başlayabilmek için sistem yöneticisinin (Admin) size bir araç ve rota ataması yapması gerekmektedir.</p>
+            </div>
+          )}
+        </div>
 
         {/* Sefer Durumu */}
         <div className={`rounded-3xl p-5 border transition-all ${tripActive ? 'bg-green-900/30 border-green-500/40' : 'bg-slate-800 border-slate-700'}`}>
@@ -257,7 +307,15 @@ export default function DriverDashboard() {
 
         {/* Sefer Başlat / Bitir */}
         {!tripActive ? (
-          <button onClick={startTrip} className="w-full py-5 rounded-3xl font-bold text-xl bg-green-500 hover:bg-green-400 active:scale-95 text-white shadow-xl shadow-green-500/30 transition-all">
+          <button 
+            onClick={startTrip} 
+            disabled={!hasAssignedRoute || loadingRoutes}
+            className={`w-full py-5 rounded-3xl font-bold text-xl transition-all shadow-xl ${
+              !hasAssignedRoute || loadingRoutes
+                ? 'bg-slate-700 text-slate-500 cursor-not-allowed shadow-none'
+                : 'bg-green-500 hover:bg-green-400 active:scale-95 text-white shadow-green-500/30'
+            }`}
+          >
             🚌 Sefere Başla
           </button>
         ) : (
@@ -280,7 +338,7 @@ export default function DriverDashboard() {
             </div>
           </div>
 
-          {!tripActive && (
+          {!tripActive && hasAssignedRoute && (
             <div className="p-3 bg-yellow-500/10 border-b border-yellow-500/20 text-yellow-400 text-xs text-center">
               Öğrenci işaretlemek için önce sefere başlayın
             </div>
