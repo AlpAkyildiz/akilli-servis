@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { API_URL } from '@/lib/config';
 
 export default function LoginPage() {
@@ -106,8 +107,14 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <div className="mt-8 text-center text-sm text-slate-400">
-          <p>Yönetici, Şoför veya Veli olarak giriş yapabilirsiniz.</p>
+        <div className="mt-8 pt-6 border-t border-white/10 text-center space-y-4">
+          <div className="text-sm text-slate-300">
+            Henüz hesabınız yok mu?{' '}
+            <Link href="/register" className="text-yellow-400 hover:text-yellow-300 font-bold hover:underline transition-all">
+              Veli Olarak Kayıt Olun
+            </Link>
+          </div>
+          <p className="text-xs text-slate-400">Yönetici, Şoför veya Veli olarak giriş yapabilirsiniz.</p>
         </div>
       </div>
     </div>
