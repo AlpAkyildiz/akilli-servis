@@ -16,6 +16,7 @@ export default function DriverDashboard() {
 
   const [students, setStudents] = useState<any[]>([]);
   const [boardedIds, setBoardedIds] = useState<Set<number>>(new Set());
+  const [historyBoardedIds, setHistoryBoardedIds] = useState<Set<number>>(new Set());
   const [loadingBoard, setLoadingBoard] = useState<number | null>(null);
   const [boardError, setBoardError] = useState('');
 
@@ -129,7 +130,7 @@ export default function DriverDashboard() {
       return;
     }
 
-    const notBoarded = students.filter(s => !boardedIds.has(s.id));
+    const notBoarded = students.filter(s => !historyBoardedIds.has(s.id));
     if (notBoarded.length > 0) {
       await Promise.all(notBoarded.map(s =>
         fetch(`${API_URL}/api/boarding/absent`, {
@@ -153,9 +154,10 @@ export default function DriverDashboard() {
     setCurrentLocation(null);
     setElapsedTime(0);
     setBoardedIds(new Set());
+    setHistoryBoardedIds(new Set());
 
     if (notBoarded.length > 0) {
-      alert(`Sefer tamamlandı.\n${notBoarded.length} öğrenci servise binmedi — velilerine bildirim gönderildi.`);
+      alert(`Sefer tamamlandı.\n${notBoarded.length} öğrenci servise hiç binmedi — velilerine devamsızlık bildirimi gönderildi.`);
     } else {
       alert('Sefer başarıyla tamamlandı!');
     }
@@ -186,6 +188,13 @@ export default function DriverDashboard() {
           alreadyBoarded ? next.delete(student.id) : next.add(student.id);
           return next;
         });
+        if (!alreadyBoarded) {
+          setHistoryBoardedIds(prev => {
+            const next = new Set(prev);
+            next.add(student.id);
+            return next;
+          });
+        }
         socketRef.current?.emit('boardingUpdate', {
           studentId: student.id,
           type: alreadyBoarded ? 'DROPPED_OFF' : 'BOARDED',
