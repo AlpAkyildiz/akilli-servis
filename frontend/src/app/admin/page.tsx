@@ -98,15 +98,18 @@ export default function AdminDashboard() {
 
       {/* Main */}
       <div className="flex-1 flex flex-col h-screen overflow-hidden">
-        <header className="bg-white border-b border-slate-200 px-8 py-4 flex justify-between items-center shadow-sm">
-          <h2 className="text-2xl font-bold text-slate-800">
+        <header className="bg-white border-b border-slate-200 px-4 md:px-8 py-4 flex justify-between items-center shadow-sm">
+          <h2 className="text-xl md:text-2xl font-bold text-slate-800">
             {view === 'dashboard' && 'Yönetim Paneli'}
             {view === 'students' && 'Öğrenci Yönetimi'}
             {view === 'drivers' && 'Şoförler ve Rotalar'}
           </h2>
           <div className="flex items-center gap-3">
-            <span className="text-slate-500 text-sm">Hoş Geldiniz, <span className="font-bold text-slate-800">{user.name}</span></span>
-            <div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center font-bold text-slate-900">A</div>
+            <span className="hidden md:inline text-slate-500 text-sm">Hoş Geldiniz, <span className="font-bold text-slate-800">{user.name}</span></span>
+            <div className="hidden md:flex w-10 h-10 bg-yellow-400 rounded-full items-center justify-center font-bold text-slate-900">A</div>
+            <button onClick={() => { localStorage.clear(); router.push('/login'); }} className="md:hidden text-sm bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-4 py-2 rounded-lg transition-colors font-medium flex items-center gap-2">
+              Çıkış Yap
+            </button>
           </div>
         </header>
 

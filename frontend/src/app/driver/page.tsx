@@ -231,7 +231,9 @@ export default function DriverDashboard() {
         </div>
         <div className="flex items-center gap-3">
           {tripActive && <span className="font-mono text-yellow-400 font-bold">{formatTime(elapsedTime)}</span>}
-          <button onClick={() => { localStorage.clear(); router.push('/login'); }} className="text-slate-400 hover:text-red-400 text-sm">Çıkış</button>
+          <button onClick={() => { localStorage.clear(); router.push('/login'); }} className="text-sm bg-slate-700 hover:bg-red-500/20 text-slate-300 hover:text-red-400 border border-slate-600 hover:border-red-500/30 px-4 py-2 rounded-lg transition-colors font-medium">
+            Çıkış Yap
+          </button>
         </div>
       </header>
 
