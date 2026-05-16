@@ -61,4 +61,20 @@ export class UserService implements IUserService {
       include: { user: true }
     });
   }
+
+  async deleteDriver(driverProfileId: number): Promise<void> {
+    const profile = await prisma.driverProfile.findUnique({ where: { id: driverProfileId } });
+    if (!profile) return;
+    
+    // Find all routes associated with driver
+    const routes = await prisma.route.findMany({ where: { driverId: profile.id } });
+    for (const r of routes) {
+      await prisma.stop.deleteMany({ where: { routeId: r.id } });
+      await prisma.boardingLog.deleteMany({ where: { routeId: r.id } });
+      await prisma.route.delete({ where: { id: r.id } });
+    }
+
+    // Delete user (DriverProfile will be cascade deleted)
+    await prisma.user.delete({ where: { id: profile.userId } });
+  }
 }

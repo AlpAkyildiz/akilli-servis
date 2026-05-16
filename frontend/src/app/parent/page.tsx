@@ -13,6 +13,10 @@ export default function ParentDashboard() {
   const [form, setForm] = useState({ name: '', schoolName: '', schoolNumber: '' });
   const [status, setStatus] = useState({ loading: false, error: '', success: '' });
 
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '' });
+  const [passwordStatus, setPasswordStatus] = useState({ loading: false, error: '', success: '' });
+
   useEffect(() => {
     const userData = localStorage.getItem('user');
     if (!userData) {
@@ -67,6 +71,30 @@ export default function ParentDashboard() {
     }
   };
 
+  const handleUpdatePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordStatus({ loading: true, error: '', success: '' });
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${API_URL}/api/auth/password`, {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` 
+        },
+        body: JSON.stringify(passwordForm)
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Şifre güncellenemedi.');
+
+      setPasswordStatus({ loading: false, error: '', success: 'Şifreniz başarıyla güncellendi!' });
+      setPasswordForm({ currentPassword: '', newPassword: '' });
+      setTimeout(() => { setIsPasswordModalOpen(false); setPasswordStatus({ loading: false, error: '', success: '' }); }, 1500);
+    } catch (err: any) {
+      setPasswordStatus({ loading: false, error: err.message, success: '' });
+    }
+  };
+
   if (!user) return <div className="min-h-screen bg-slate-50 flex items-center justify-center text-slate-500">Yükleniyor...</div>;
 
   return (
@@ -82,6 +110,9 @@ export default function ParentDashboard() {
           </div>
           <div className="flex items-center gap-3 md:gap-6">
             <span className="hidden md:inline font-medium text-blue-100">Merhaba, {user.name}</span>
+            <button onClick={() => setIsPasswordModalOpen(true)} className="text-sm bg-white/10 hover:bg-white/20 px-3 py-2 rounded-lg transition-colors">
+              Şifre Değiştir
+            </button>
             <button onClick={() => window.location.reload()} className="p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors" title="Sayfayı Yenile">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" /></svg>
             </button>
@@ -192,6 +223,37 @@ export default function ParentDashboard() {
 
               <button disabled={status.loading} type="submit" className="w-full mt-4 py-3 bg-yellow-400 hover:bg-yellow-300 text-blue-900 font-bold rounded-xl transition-all shadow-lg hover:shadow-yellow-400/30">
                 {status.loading ? 'Ekleniyor...' : 'Öğrenciyi Kaydet'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Password Update Modal */}
+      {isPasswordModalOpen && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden">
+            <div className="bg-slate-50 border-b border-slate-100 p-6 flex justify-between items-center">
+              <h3 className="text-xl font-bold text-slate-800">Şifre Değiştir</h3>
+              <button onClick={() => setIsPasswordModalOpen(false)} className="text-slate-400 hover:text-red-500 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <form onSubmit={handleUpdatePassword} className="p-6 space-y-4">
+              {passwordStatus.error && <div className="p-3 bg-red-100 text-red-700 rounded-xl text-sm font-medium">{passwordStatus.error}</div>}
+              {passwordStatus.success && <div className="p-3 bg-green-100 text-green-700 rounded-xl text-sm font-medium">{passwordStatus.success}</div>}
+              
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Mevcut Şifre</label>
+                <input type="password" required value={passwordForm.currentPassword} onChange={e => setPasswordForm({...passwordForm, currentPassword: e.target.value})} className="w-full p-3 bg-white text-slate-900 border border-slate-200 rounded-xl focus:ring-2 focus:ring-yellow-400 focus:outline-none" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Yeni Şifre</label>
+                <input type="password" required value={passwordForm.newPassword} onChange={e => setPasswordForm({...passwordForm, newPassword: e.target.value})} className="w-full p-3 bg-white text-slate-900 border border-slate-200 rounded-xl focus:ring-2 focus:ring-yellow-400 focus:outline-none" />
+              </div>
+
+              <button disabled={passwordStatus.loading} type="submit" className="w-full mt-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-lg">
+                {passwordStatus.loading ? 'Güncelleniyor...' : 'Şifreyi Güncelle'}
               </button>
             </form>
           </div>

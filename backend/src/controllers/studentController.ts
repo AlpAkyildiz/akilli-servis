@@ -26,6 +26,16 @@ export const approveStudent = async (req: Request, res: Response) => {
   }
 };
 
+export const deleteStudent = async (req: Request, res: Response) => {
+  try {
+    const studentId = parseInt(req.params.id);
+    const student = await studentService.deleteStudent(studentId);
+    res.json({ message: 'Öğrenci silindi.', student });
+  } catch (error) {
+    res.status(500).json({ error: 'Öğrenci silinirken bir hata oluştu.' });
+  }
+};
+
 export const getStudents = async (req: AuthRequest, res: Response) => {
   try {
     const role = req.user?.role;

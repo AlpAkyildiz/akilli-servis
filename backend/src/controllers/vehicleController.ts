@@ -30,3 +30,13 @@ export const getVehicles = async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Araçlar listelenirken bir hata oluştu.' });
   }
 };
+
+export const deleteVehicle = async (req: Request, res: Response) => {
+  try {
+    const vehicleId = parseInt(req.params.id);
+    await vehicleService.deleteVehicle(vehicleId);
+    res.json({ message: 'Araç silindi.' });
+  } catch (error) {
+    res.status(500).json({ error: 'Araç silinirken bir hata oluştu.' });
+  }
+};

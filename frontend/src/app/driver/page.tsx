@@ -24,6 +24,10 @@ export default function DriverDashboard() {
   const [myRoutes, setMyRoutes] = useState<any[]>([]);
   const [loadingRoutes, setLoadingRoutes] = useState(true);
 
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '' });
+  const [passwordStatus, setPasswordStatus] = useState({ loading: false, error: '', success: '' });
+
   const socketRef = useRef<Socket | null>(null);
   const watchIdRef = useRef<number | null>(null);
   const timerRef = useRef<any>(null);
@@ -163,6 +167,30 @@ export default function DriverDashboard() {
     }
   };
 
+  const handleUpdatePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordStatus({ loading: true, error: '', success: '' });
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${API_URL}/api/auth/password`, {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` 
+        },
+        body: JSON.stringify(passwordForm)
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Şifre güncellenemedi.');
+
+      setPasswordStatus({ loading: false, error: '', success: 'Şifreniz başarıyla güncellendi!' });
+      setPasswordForm({ currentPassword: '', newPassword: '' });
+      setTimeout(() => { setIsPasswordModalOpen(false); setPasswordStatus({ loading: false, error: '', success: '' }); }, 1500);
+    } catch (err: any) {
+      setPasswordStatus({ loading: false, error: err.message, success: '' });
+    }
+  };
+
   const toggleBoard = async (student: any) => {
     if (!tripActive) return;
     const alreadyBoarded = boardedIds.has(student.id);
@@ -231,6 +259,9 @@ export default function DriverDashboard() {
         </div>
         <div className="flex items-center gap-2 md:gap-3">
           {tripActive && <span className="font-mono text-yellow-400 font-bold">{formatTime(elapsedTime)}</span>}
+          <button onClick={() => setIsPasswordModalOpen(true)} className="p-2 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg transition-colors border border-slate-600 text-sm font-medium" title="Şifre Değiştir">
+            Şifre
+          </button>
           <button onClick={() => window.location.reload()} className="p-2 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg transition-colors border border-slate-600" title="Sayfayı Yenile">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" /></svg>
           </button>
@@ -394,6 +425,37 @@ export default function DriverDashboard() {
           </div>
         </div>
       </main>
+
+      {/* Password Update Modal */}
+      {isPasswordModalOpen && (
+        <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-800 border border-slate-700 rounded-3xl w-full max-w-md shadow-2xl overflow-hidden">
+            <div className="bg-slate-700/50 border-b border-slate-700 p-6 flex justify-between items-center">
+              <h3 className="text-xl font-bold text-white">Şifre Değiştir</h3>
+              <button onClick={() => setIsPasswordModalOpen(false)} className="text-slate-400 hover:text-red-400 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <form onSubmit={handleUpdatePassword} className="p-6 space-y-4">
+              {passwordStatus.error && <div className="p-3 bg-red-500/20 border border-red-500/30 text-red-400 rounded-xl text-sm font-medium">{passwordStatus.error}</div>}
+              {passwordStatus.success && <div className="p-3 bg-green-500/20 border border-green-500/30 text-green-400 rounded-xl text-sm font-medium">{passwordStatus.success}</div>}
+              
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1">Mevcut Şifre</label>
+                <input type="password" required value={passwordForm.currentPassword} onChange={e => setPasswordForm({...passwordForm, currentPassword: e.target.value})} className="w-full p-3 bg-slate-700 text-white border border-slate-600 rounded-xl focus:ring-2 focus:ring-yellow-400 focus:outline-none" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1">Yeni Şifre</label>
+                <input type="password" required value={passwordForm.newPassword} onChange={e => setPasswordForm({...passwordForm, newPassword: e.target.value})} className="w-full p-3 bg-slate-700 text-white border border-slate-600 rounded-xl focus:ring-2 focus:ring-yellow-400 focus:outline-none" />
+              </div>
+
+              <button disabled={passwordStatus.loading} type="submit" className="w-full mt-4 py-3 bg-yellow-400 hover:bg-yellow-300 text-slate-900 font-bold rounded-xl transition-all shadow-lg">
+                {passwordStatus.loading ? 'Güncelleniyor...' : 'Şifreyi Güncelle'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

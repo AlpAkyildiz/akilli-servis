@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { UserService } from '../services/UserService';
 import prisma from '../prisma';
+import { AuthRequest } from '../middlewares/auth';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'gizli_anahtar';
 const userService = new UserService(); // Dependency Injection via instantiation (can be advanced further)
@@ -77,5 +78,43 @@ export const getDrivers = async (req: Request, res: Response) => {
     res.json(drivers);
   } catch (error) {
     res.status(500).json({ error: 'Şoförler getirilirken bir hata oluştu.' });
+  }
+};
+
+export const deleteDriver = async (req: Request, res: Response) => {
+  try {
+    const driverId = parseInt(req.params.id);
+    await userService.deleteDriver(driverId);
+    res.json({ message: 'Şoför silindi.' });
+  } catch (error) {
+    res.status(500).json({ error: 'Şoför silinirken bir hata oluştu.' });
+  }
+};
+
+export const updatePassword = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ error: 'Yetkisiz erişim.' });
+
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ error: 'Mevcut şifre ve yeni şifre zorunludur.' });
+    }
+
+    const user = await prisma.user.findUnique({ where: { id: Number(userId) } });
+    if (!user) return res.status(404).json({ error: 'Kullanıcı bulunamadı.' });
+
+    const validPassword = await bcrypt.compare(currentPassword, user.password);
+    if (!validPassword) return res.status(400).json({ error: 'Mevcut şifreniz hatalı.' });
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await prisma.user.update({
+      where: { id: Number(userId) },
+      data: { password: hashedPassword }
+    });
+
+    res.json({ message: 'Şifreniz başarıyla güncellendi.' });
+  } catch (error) {
+    res.status(500).json({ error: 'Şifre güncellenirken bir hata oluştu.' });
   }
 };

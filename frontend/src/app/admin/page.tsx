@@ -56,6 +56,30 @@ export default function AdminDashboard() {
     fetchAll();
   };
 
+  const handleDeleteStudent = async (id: number) => {
+    if (!confirm('Bu öğrenciyi silmek istediğinize emin misiniz?')) return;
+    await fetch(`${API_URL}/api/students/${id}`, { method:'DELETE', headers: authHeader() });
+    fetchAll();
+  };
+
+  const handleDeleteDriver = async (id: number) => {
+    if (!confirm('Bu şoförü silmek istediğinize emin misiniz? Atanmış rotaları da silinecektir.')) return;
+    await fetch(`${API_URL}/api/auth/staff/drivers/${id}`, { method:'DELETE', headers: authHeader() });
+    fetchAll();
+  };
+
+  const handleDeleteVehicle = async (id: number) => {
+    if (!confirm('Bu aracı silmek istediğinize emin misiniz? Atanmış rotaları da silinecektir.')) return;
+    await fetch(`${API_URL}/api/vehicles/${id}`, { method:'DELETE', headers: authHeader() });
+    fetchAll();
+  };
+
+  const handleDeleteRoute = async (id: number) => {
+    if (!confirm('Bu rotayı silmek istediğinize emin misiniz?')) return;
+    await fetch(`${API_URL}/api/routes/${id}`, { method:'DELETE', headers: authHeader() });
+    fetchAll();
+  };
+
   const submit = async (url: string, body: any) => {
     setFormStatus({ loading:true, error:'', success:'' });
     const res = await fetch(url, { method:'POST', headers: authHeader(), body: JSON.stringify(body) });
@@ -160,7 +184,10 @@ export default function AdminDashboard() {
                             <td className="p-4 text-slate-500 text-sm">{s.schoolName}</td>
                             <td className="p-4 text-slate-500 text-sm">{s.parent?.user?.name || '-'}</td>
                             <td className="p-4"><span className="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs font-bold rounded-full">Bekliyor</span></td>
-                            <td className="p-4"><button onClick={() => handleApprove(s.id)} className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg transition-colors">Onayla</button></td>
+                            <td className="p-4 flex gap-2">
+                              <button onClick={() => handleApprove(s.id)} className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg transition-colors">Onayla</button>
+                              <button onClick={() => handleDeleteStudent(s.id)} className="px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 text-xs font-bold rounded-lg transition-colors">Sil</button>
+                            </td>
                           </tr>
                         ))}
                       </tbody>
@@ -216,7 +243,15 @@ export default function AdminDashboard() {
                           {s.status === 'REJECTED' && <span className="px-2 py-1 bg-red-100 text-red-700 text-xs font-bold rounded-full">Reddedildi</span>}
                         </td>
                         <td className="p-4">
-                          {s.status === 'PENDING' && <button onClick={() => handleApprove(s.id)} className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg transition-colors">Onayla</button>}
+                          {s.status === 'PENDING' && (
+                            <div className="flex gap-2">
+                              <button onClick={() => handleApprove(s.id)} className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg transition-colors">Onayla</button>
+                              <button onClick={() => handleDeleteStudent(s.id)} className="px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 text-xs font-bold rounded-lg transition-colors">Sil</button>
+                            </div>
+                          )}
+                          {s.status !== 'PENDING' && (
+                            <button onClick={() => handleDeleteStudent(s.id)} className="px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 text-xs font-bold rounded-lg transition-colors">Sil</button>
+                          )}
                         </td>
                       </tr>
                     ))}
@@ -242,14 +277,17 @@ export default function AdminDashboard() {
                   <div className="divide-y">
                     {drivers.length === 0 ? <p className="p-8 text-center text-slate-400">Henüz şoför eklenmedi.</p> :
                       drivers.map(d => (
-                        <div key={d.id} className="p-4 flex items-center gap-4 hover:bg-slate-50">
-                          <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 font-bold">
-                            {d.user?.name?.substring(0,1) || '?'}
+                        <div key={d.id} className="p-4 flex items-center gap-4 hover:bg-slate-50 justify-between">
+                          <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 font-bold">
+                              {d.user?.name?.substring(0,1) || '?'}
+                            </div>
+                            <div>
+                              <p className="font-medium text-slate-800">{d.user?.name}</p>
+                              <p className="text-xs text-slate-400">{d.user?.email} • Ehliyet: {d.licenseNumber}</p>
+                            </div>
                           </div>
-                          <div>
-                            <p className="font-medium text-slate-800">{d.user?.name}</p>
-                            <p className="text-xs text-slate-400">{d.user?.email} • Ehliyet: {d.licenseNumber}</p>
-                          </div>
+                          <button onClick={() => handleDeleteDriver(d.id)} className="px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 text-xs font-bold rounded-lg transition-colors">Sil</button>
                         </div>
                       ))}
                   </div>
@@ -261,12 +299,15 @@ export default function AdminDashboard() {
                   <div className="divide-y">
                     {vehicles.length === 0 ? <p className="p-8 text-center text-slate-400">Henüz araç eklenmedi.</p> :
                       vehicles.map(v => (
-                        <div key={v.id} className="p-4 flex items-center gap-4 hover:bg-slate-50">
-                          <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-2xl">🚌</div>
-                          <div>
-                            <p className="font-bold text-slate-800">{v.licensePlate}</p>
-                            <p className="text-xs text-slate-400">{v.model || 'Model belirtilmedi'} • {v.capacity} kişilik</p>
+                        <div key={v.id} className="p-4 flex items-center gap-4 hover:bg-slate-50 justify-between">
+                          <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-2xl">🚌</div>
+                            <div>
+                              <p className="font-bold text-slate-800">{v.licensePlate}</p>
+                              <p className="text-xs text-slate-400">{v.model || 'Model belirtilmedi'} • {v.capacity} kişilik</p>
+                            </div>
                           </div>
+                          <button onClick={() => handleDeleteVehicle(v.id)} className="px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 text-xs font-bold rounded-lg transition-colors">Sil</button>
                         </div>
                       ))}
                   </div>
@@ -279,12 +320,15 @@ export default function AdminDashboard() {
                 <div className="divide-y">
                   {routes.length === 0 ? <p className="p-8 text-center text-slate-400">Henüz rota oluşturulmadı.</p> :
                     routes.map(r => (
-                      <div key={r.id} className="p-4 flex items-center gap-4 hover:bg-slate-50">
-                        <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center text-2xl">🗺️</div>
-                        <div className="flex-1">
-                          <p className="font-bold text-slate-800">{r.name}</p>
-                          <p className="text-xs text-slate-400">{r.startPoint} → {r.endPoint} • Şoför: {r.driver?.user?.name || '-'} • Araç: {r.vehicle?.licensePlate || '-'}</p>
+                      <div key={r.id} className="p-4 flex items-center gap-4 hover:bg-slate-50 justify-between">
+                        <div className="flex items-center gap-4 flex-1">
+                          <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center text-2xl">🗺️</div>
+                          <div>
+                            <p className="font-bold text-slate-800">{r.name}</p>
+                            <p className="text-xs text-slate-400">{r.startPoint} → {r.endPoint} • Şoför: {r.driver?.user?.name || '-'} • Araç: {r.vehicle?.licensePlate || '-'}</p>
+                          </div>
                         </div>
+                        <button onClick={() => handleDeleteRoute(r.id)} className="px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 text-xs font-bold rounded-lg transition-colors">Sil</button>
                       </div>
                     ))}
                 </div>

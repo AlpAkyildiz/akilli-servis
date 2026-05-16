@@ -42,4 +42,10 @@ export class RouteService implements IRouteService {
       include: { stops: true, vehicle: true }
     });
   }
+
+  async deleteRoute(id: number): Promise<Route> {
+    await prisma.stop.deleteMany({ where: { routeId: id } });
+    await prisma.boardingLog.deleteMany({ where: { routeId: id } });
+    return prisma.route.delete({ where: { id } });
+  }
 }

@@ -39,6 +39,12 @@ export class StudentService implements IStudentService {
     });
   }
 
+  async deleteStudent(studentId: number): Promise<Student> {
+    return prisma.student.delete({
+      where: { id: studentId }
+    });
+  }
+
   async getAllStudents(): Promise<Student[]> {
     return prisma.student.findMany({
       include: {

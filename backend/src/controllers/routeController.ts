@@ -61,3 +61,13 @@ export const getMyRoutes = async (req: AuthRequest, res: Response) => {
     res.status(500).json({ error: 'Atanmış rotalar getirilemedi.', detail: error.message });
   }
 };
+
+export const deleteRoute = async (req: Request, res: Response) => {
+  try {
+    const routeId = parseInt(req.params.id);
+    await routeService.deleteRoute(routeId);
+    res.json({ message: 'Rota silindi.' });
+  } catch (error) {
+    res.status(500).json({ error: 'Rota silinirken bir hata oluştu.' });
+  }
+};

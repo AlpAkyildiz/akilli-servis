@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { createStudent, approveStudent, getStudents } from '../controllers/studentController';
+import { createStudent, approveStudent, deleteStudent, getStudents } from '../controllers/studentController';
 import { authenticateToken } from '../middlewares/auth';
 import { authorizeRoles } from '../middlewares/role';
 
@@ -11,7 +11,8 @@ router.get('/', authenticateToken, authorizeRoles('ADMIN', 'PARENT'), getStudent
 // Veli öğrenci ekleyebilir
 router.post('/', authenticateToken, authorizeRoles('PARENT'), createStudent);
 
-// Sadece Admin onaylayabilir
+// Sadece Admin onaylayabilir veya silebilir
 router.put('/:id/approve', authenticateToken, authorizeRoles('ADMIN'), approveStudent);
+router.delete('/:id', authenticateToken, authorizeRoles('ADMIN'), deleteStudent);
 
 export default router;
